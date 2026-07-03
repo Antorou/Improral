@@ -1,0 +1,9 @@
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/uploads/
+*.pyc
+.env
+
+# MacOS / OS
+.DS_Store
