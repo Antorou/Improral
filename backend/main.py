@@ -2,6 +2,7 @@ import os
 import aiofiles
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from audio_service import audio_service
 
 app = FastAPI(title="Improral API", description="API pour l'application Improral", version="1.0.0")
 
@@ -30,8 +31,12 @@ async def upload_audio(audio_file: UploadFile = File(...)):
         content = await audio_file.read()
         await out_file.write(content)
         
+    # Transcription avec faster-whisper
+    transcription_result = audio_service.transcribe(file_path)
+        
     return {
         "status": "success", 
-        "message": f"Fichier {audio_file.filename} reçu et sauvegardé.", 
-        "file_path": file_path
+        "message": f"Fichier {audio_file.filename} analysé avec succès.", 
+        "file_path": file_path,
+        "transcription": transcription_result
     }

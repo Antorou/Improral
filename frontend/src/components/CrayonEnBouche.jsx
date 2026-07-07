@@ -4,15 +4,16 @@ import { useAudioRecorder } from '../hooks/useAudioRecorder';
 export default function CrayonEnBouche() {
   const { isRecording, audioBlob, startRecording, stopRecording, clearRecording } = useAudioRecorder();
   const [uploadStatus, setUploadStatus] = useState(null);
+  const [transcription, setTranscription] = useState(null);
 
   const testText = "Les chaussettes de l'archiduchesse sont-elles sèches, archi-sèches ?";
 
   const handleUpload = async () => {
     if (!audioBlob) return;
 
-    setUploadStatus('Uploading...');
+    setUploadStatus('Analyse en cours (STT)...');
+    setTranscription(null);
     const formData = new FormData();
-    // API FastAPI attend "audio_file"
     formData.append('audio_file', audioBlob, 'enregistrement.webm');
 
     try {
@@ -22,11 +23,14 @@ export default function CrayonEnBouche() {
       });
 
       if (!response.ok) {
-        throw new Error('Erreur lors de l\'upload');
+        throw new Error('Erreur lors de l\'analyse');
       }
 
       const data = await response.json();
       setUploadStatus(`Succès: ${data.message}`);
+      if (data.transcription) {
+        setTranscription(data.transcription.text);
+      }
     } catch (error) {
       console.error(error);
       setUploadStatus(`Erreur: ${error.message}`);
@@ -60,15 +64,22 @@ export default function CrayonEnBouche() {
           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
             <audio src={URL.createObjectURL(audioBlob)} controls />
             <button onClick={handleUpload} style={{ background: '#2196f3', color: 'white' }}>
-              📤 Envoyer au backend
+              📤 Analyser la diction (IA)
             </button>
-            <button onClick={clearRecording}>Effacer</button>
+            <button onClick={() => { clearRecording(); setTranscription(null); setUploadStatus(null); }}>Effacer</button>
           </div>
         </div>
       )}
 
       {uploadStatus && (
         <p style={{ marginTop: '1rem', fontWeight: 'bold' }}>{uploadStatus}</p>
+      )}
+
+      {transcription && (
+        <div style={{ marginTop: '2rem', padding: '1rem', background: '#fff9c4', borderRadius: '8px', color: '#333', textAlign: 'left' }}>
+          <h3>Transcription (Ce que l'IA a compris) :</h3>
+          <p style={{ fontSize: '1.2rem', fontStyle: 'italic' }}>"{transcription}"</p>
+        </div>
       )}
     </div>
   );
