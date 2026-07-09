@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react'
 import CrayonEnBouche from './components/CrayonEnBouche'
+import ShadowTalk from './components/ShadowTalk'
 
 function App() {
   const [health, setHealth] = useState(null)
+  const [currentTab, setCurrentTab] = useState('crayon') // 'crayon' or 'shadow'
 
   useEffect(() => {
     fetch('http://localhost:8000/health')
@@ -47,8 +49,24 @@ function App() {
         </div>
       </header>
 
-      <main>
-        <CrayonEnBouche />
+      <main className="max-w-4xl mx-auto">
+        <div className="flex justify-center gap-4 mb-8">
+          <button 
+            onClick={() => setCurrentTab('crayon')}
+            className={`px-6 py-2 rounded-full font-semibold transition-all ${currentTab === 'crayon' ? 'bg-dark-accent text-slate-900 shadow-[0_0_15px_rgba(56,189,248,0.4)]' : 'bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+          >
+            🖊️ Crayon en bouche
+          </button>
+          <button 
+            onClick={() => setCurrentTab('shadow')}
+            className={`px-6 py-2 rounded-full font-semibold transition-all ${currentTab === 'shadow' ? 'bg-purple-500 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]' : 'bg-slate-800 text-slate-400 hover:text-slate-200'}`}
+          >
+            🎤 Shadow Talk
+          </button>
+        </div>
+
+        {currentTab === 'crayon' && <CrayonEnBouche />}
+        {currentTab === 'shadow' && <ShadowTalk />}
       </main>
     </div>
   )

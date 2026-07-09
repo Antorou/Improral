@@ -29,17 +29,25 @@ class AudioService:
 
     def transcribe(self, audio_path: str) -> dict:
         """
-        Transcrit un fichier audio et retourne le texte complet.
-        Dans une V2, on pourra aussi récupérer les timestamps par mot (word_timestamps=True).
+        Transcrit un fichier audio et retourne le texte complet ainsi que les timestamps mot par mot.
         """
-        segments, info = self.model.transcribe(audio_path, beam_size=5)
+        segments, info = self.model.transcribe(audio_path, beam_size=5, word_timestamps=True)
         
         text = ""
+        words = []
         for segment in segments:
             text += segment.text + " "
+            for word in segment.words:
+                words.append({
+                    "word": word.word.strip(),
+                    "start": round(word.start, 2),
+                    "end": round(word.end, 2),
+                    "probability": round(word.probability, 2)
+                })
             
         return {
             "text": text.strip(),
+            "words": words,
             "language": info.language,
             "language_probability": info.language_probability
         }
